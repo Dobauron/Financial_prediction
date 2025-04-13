@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 import scipy.stats
 import numpy as np
 
+
 class FinancialAnalysis:
     def __init__(self):
         self.dataset = None
@@ -26,7 +27,7 @@ class FinancialAnalysis:
         cols = ["Profit", "Sale Price", "Units Sold", "Manufacturing Price", "Gross Sales", "COGS"]
         for col in cols:
             if col in self.dataset.columns:
-                self.dataset[col] = self.dataset[col].replace('[\$,]', '', regex=True)
+                self.dataset[col] = self.dataset[col].replace(r'[\$,]', '', regex=True)
                 self.dataset[col] = pd.to_numeric(self.dataset[col], errors='coerce')
                 self.dataset = self.dataset[self.dataset[col].notna()]
 
@@ -55,11 +56,22 @@ class FinancialAnalysis:
         plt.show()
 
     def compute_pearsonr(self):
-        if "Profit" in self.dataset.columns and "Units Sold" in self.dataset.columns:
-            corr, _ = scipy.stats.pearsonr(self.dataset["Profit"], self.dataset["Units Sold"])
-            messagebox.showinfo("Korelacja Pearsona", f"Pearson R (Profit vs Units Sold): {corr:.4f}")
+        if "Profit" not in self.dataset.columns:
+            messagebox.showwarning("Brak danych", "Kolumna 'Profit' nie istnieje w danych.")
+            return
+
+        correlations = []
+        for col in self.dataset.columns:
+            if col != "Profit" and pd.api.types.is_numeric_dtype(self.dataset[col]):
+                corr, _ = scipy.stats.pearsonr(self.dataset["Profit"], self.dataset[col])
+                correlations.append((col, corr))
+
+        if correlations:
+            result_text = "Współczynniki korelacji Pearsona względem 'Profit':\n\n"
+            result_text += "\n".join([f"{col}: {corr:.4f}" for col, corr in correlations])
+            messagebox.showinfo("Korelacja Pearsona", result_text)
         else:
-            messagebox.showwarning("Brak danych", "Brakuje odpowiednich kolumn.")
+            messagebox.showwarning("Brak danych", "Brak wystarczających danych liczbowych do obliczenia korelacji.")
 
     def train_and_evaluate_model(self):
         if 'COGS' not in self.dataset.columns or 'Profit' not in self.dataset.columns:
