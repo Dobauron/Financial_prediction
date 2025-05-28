@@ -6,7 +6,6 @@ from xgboost import XGBClassifier
 import matplotlib.pyplot as plt
 
 # === 1. Ustawienia ===
-API_KEY = "d0njs2hr01qn5ghk6m7gd0njs2hr01qn5ghk6m80"
 symbol = "TSLA"
 
 # === 2. Pobieranie danych ===
